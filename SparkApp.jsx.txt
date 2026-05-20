@@ -1,0 +1,170 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Home, BookOpen, Users, User, Zap, Shield, 
+  Wifi, WifiOff, Award, ChevronRight, CheckCircle2, 
+  AlertCircle, Beaker, Globe, Activity, Leaf, 
+  UserPlus, Check, Sparkles, School, Trophy, ArrowRight
+} from 'lucide-react';
+
+// --- ONBOARDING DATA ---
+const SPECIALTIES = [
+  { id: 'chem', title: 'Chemistry', icon: Beaker, color: 'text-blue-400', desc: 'Masters of matter, elements, and solutions.' },
+  { id: 'bio', title: 'Biology', icon: Leaf, color: 'text-green-400', desc: 'Explorers of cells, ecosystems, and biodiversity.' },
+  { id: 'phys', title: 'Physics', icon: Zap, color: 'text-purple-400', desc: 'Pioneers of energy, forces, and kinetic motion.' },
+  { id: 'earth', title: 'Earth Science', icon: Globe, color: 'text-orange-400', desc: 'Guardians of earth layers, weather, and resources.' }
+];
+
+const AVATARS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+export default function SparkApp() {
+  // Navigation State
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [onboardingPage, setOnboardingPage] = useState('welcome'); // welcome, name, avatar, course, dashboard
+
+  // Registration Form State
+  const [regName, setRegName] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+
+  // Gameplay State
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('home');
+
+  const completeRegistration = () => {
+    setUser({
+      name: regName,
+      avatar: selectedAvatar,
+      specialty: selectedSpecialty.title,
+      level: 1,
+      xp: 0,
+      xpToNext: 1000
+    });
+    setIsRegistered(true);
+  };
+
+  return (
+    <div className="flex justify-center bg-slate-950 min-h-screen font-sans text-slate-100">
+      <div className="w-full max-w-md bg-slate-900 h-[100dvh] flex flex-col relative overflow-hidden shadow-2xl sm:border-x sm:border-slate-800">
+        
+        {!isRegistered ? (
+          <OnboardingFlow 
+            page={onboardingPage} 
+            setPage={setOnboardingPage}
+            name={regName} setName={setRegName}
+            avatar={selectedAvatar} setAvatar={setSelectedAvatar}
+            specialty={selectedSpecialty} setSpecialty={setSelectedSpecialty}
+            onFinish={completeRegistration}
+          />
+        ) : (
+          <MainDashboard user={user} activeTab={activeTab} setActiveTab={setActiveTab} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function OnboardingFlow({ page, setPage, name, setName, avatar, setAvatar, specialty, setSpecialty, onFinish }) {
+  return (
+    <div className="flex-1 flex flex-col p-8 justify-center animate-in fade-in duration-500">
+      {page === 'welcome' && (
+        <div className="text-center space-y-6">
+          <div className="w-20 h-20 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <Zap size={40} className="text-white" />
+          </div>
+          <h1 className="text-3xl font-bold">Welcome to SPARK</h1>
+          <p className="text-slate-400">Let's set up your scientific profile to begin your journey.</p>
+          <button onClick={() => setPage('name')} className="w-full py-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 flex justify-center gap-2 items-center">
+            Start <ArrowRight size={18} />
+          </button>
+        </div>
+      )}
+
+      {page === 'name' && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">What should we call you, bright scientist?</h2>
+          <input 
+            autoFocus
+            type="text" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)}
+            className="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:border-cyan-500 outline-none"
+          />
+          <button disabled={!name} onClick={() => setPage('avatar')} className="w-full py-4 bg-blue-600 disabled:opacity-50 rounded-xl font-bold">Next</button>
+        </div>
+      )}
+
+      {page === 'avatar' && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">Choose your appearance</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {AVATARS.map((a) => (
+              <button 
+                key={a}
+                onClick={() => setAvatar(a)}
+                className={`aspect-square rounded-2xl border-2 flex items-center justify-center text-2xl font-bold ${avatar === a ? 'border-cyan-500 bg-cyan-900/20' : 'border-slate-700 bg-slate-800'}`}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+          <button disabled={!avatar} onClick={() => setPage('course')} className="w-full py-4 bg-blue-600 disabled:opacity-50 rounded-xl font-bold">Next</button>
+        </div>
+      )}
+
+      {page === 'course' && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold mb-4">Pick your science branch</h2>
+          {SPECIALTIES.map((spec) => (
+            <button 
+              key={spec.id}
+              onClick={() => setSpecialty(spec)}
+              className={`w-full p-4 rounded-xl border flex items-center gap-4 ${specialty?.id === spec.id ? 'border-cyan-500 bg-cyan-900/20' : 'border-slate-700 bg-slate-800'}`}
+            >
+              <spec.icon className={spec.color} size={24} />
+              <div className="text-left">
+                <div className="font-bold">{spec.title}</div>
+                <div className="text-xs text-slate-400">{spec.desc}</div>
+              </div>
+            </button>
+          ))}
+          <button disabled={!specialty} onClick={onFinish} className="w-full py-4 bg-blue-600 disabled:opacity-50 rounded-xl font-bold mt-4">Complete Setup</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MainDashboard({ user, activeTab, setActiveTab }) {
+  return (
+    <>
+      <header className="p-4 border-b border-slate-800 flex justify-between items-center">
+        <h1 className="font-bold text-xl text-cyan-400">SPARK</h1>
+        <div className="text-xs font-bold bg-slate-800 px-3 py-1 rounded-full">{user.name}</div>
+      </header>
+      <main className="flex-1 p-6">
+        <div className="bg-gradient-to-br from-blue-900 to-slate-900 p-6 rounded-2xl border border-blue-800 mb-6">
+          <p className="text-blue-300 text-sm">Welcome back, Scientist</p>
+          <h2 className="text-2xl font-bold">{user.name}</h2>
+          <p className="text-cyan-400 font-bold mt-2">{user.specialty} Branch</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-slate-800 p-4 rounded-xl text-center">
+            <Trophy className="mx-auto mb-2 text-yellow-500" />
+            <div className="text-xl font-bold">{user.level}</div>
+            <div className="text-[10px] text-slate-400 uppercase">Level</div>
+          </div>
+          <div className="bg-slate-800 p-4 rounded-xl text-center">
+            <Activity className="mx-auto mb-2 text-green-500" />
+            <div className="text-xl font-bold">{user.xp}</div>
+            <div className="text-[10px] text-slate-400 uppercase">Total XP</div>
+          </div>
+        </div>
+      </main>
+      <nav className="p-4 border-t border-slate-800 flex justify-around">
+        <button onClick={() => setActiveTab('home')} className={activeTab === 'home' ? 'text-cyan-400' : 'text-slate-500'}><Home /></button>
+        <button onClick={() => setActiveTab('learn')} className={activeTab === 'learn' ? 'text-cyan-400' : 'text-slate-500'}><BookOpen /></button>
+        <button onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'text-cyan-400' : 'text-slate-500'}><User /></button>
+      </nav>
+    </>
+  );
+}
